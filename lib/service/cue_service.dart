@@ -22,10 +22,9 @@ class CueService {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        List<dynamic> jsonResponse = json.decode(utf8.decode(response.bodyBytes));
-        return jsonResponse
-            .map((json) => CueResponse.fromMap(json))
-            .toList();
+        final Map<String, dynamic> jsonResponse = json.decode(utf8.decode(response.bodyBytes));
+        var list = jsonResponse['items'] as List<dynamic>;
+        return list.map((model) => CueResponse.fromMap(model)).toList();
       } else {
         throw Exception('Failed to load cues: ${response.statusCode}');
       }
