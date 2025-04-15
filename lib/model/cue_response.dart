@@ -4,14 +4,14 @@ import 'package:billiard_club_frontend/model/manufacturer_response.dart';
 class CueResponse {
   final int id;
   final String name;
+  final double price;
   final int amount;
   final String tipType;
-  final String amountOfParts;
+  final int amountOfParts;
   final String material;
   final int diameter;
   final double weight; // Use double for BigDecimal
   final double length; // Use double for BigDecimal
-  final String brand;
   final String category;
   final String description;
   final CueTypeResponse cueType;
@@ -20,6 +20,7 @@ class CueResponse {
   CueResponse({
     required this.id,
     required this.name,
+    required this.price,
     required this.amount,
     required this.tipType,
     required this.amountOfParts,
@@ -27,7 +28,6 @@ class CueResponse {
     required this.diameter,
     required this.weight,
     required this.length,
-    required this.brand,
     required this.category,
     required this.description,
     required this.cueType,
@@ -38,14 +38,14 @@ class CueResponse {
     return CueResponse(
       id: json['id'],
       name: json['name'] ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
       amount: json['amount'] ?? 0,
       tipType: json['tipType'] ?? '',
-      amountOfParts: json['amountOfParts'] ?? '',
+      amountOfParts: json['amountOfParts'] ?? 0,
       material: json['material'] ?? '',
       diameter: json['diameter'] ?? 0,
       weight: (json['weight'] as num?)?.toDouble() ?? 0.0,
       length: (json['length'] as num?)?.toDouble() ?? 0.0,
-      brand: json['brand'] ?? '',
       category: json['category'] ?? '',
       description: json['description'] ?? '',
       cueType: CueTypeResponse.fromMap(json['cueType']),
@@ -57,6 +57,7 @@ class CueResponse {
     return {
       'id': id,
       'name': name,
+      'price': price,
       'amount': amount,
       'tipType': tipType,
       'amountOfParts': amountOfParts,
@@ -64,7 +65,6 @@ class CueResponse {
       'diameter': diameter,
       'weight': weight,
       'length': length,
-      'brand': brand,
       'category': category,
       'description': description,
       'cueType': cueType.toMap(),

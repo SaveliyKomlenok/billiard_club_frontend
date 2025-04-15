@@ -12,8 +12,8 @@ class BilliardTableResponse {
   final String clothColor;
   final String numberOfPockets;
   final String description;
-  final bool isReserved;
   final ManufacturerResponse manufacturer; 
+  final double price;
   final BilliardTableTypeResponse billiardTableType;
 
   BilliardTableResponse({
@@ -27,8 +27,8 @@ class BilliardTableResponse {
     required this.clothColor,
     required this.numberOfPockets,
     required this.description,
-    required this.isReserved,
     required this.manufacturer,
+    required this.price,
     required this.billiardTableType,
   });
 
@@ -42,9 +42,9 @@ class BilliardTableResponse {
       frameMaterial: json['frameMaterial'] ?? '',
       clothMaterial: json['clothMaterial'] ?? '',
       clothColor: json['clothColor'] ?? '',
+      price: json['price'] ?? '',
       numberOfPockets: json['numberOfPockets'],
       description: json['description'] ?? '',
-      isReserved: json['isReserved'] ?? false,
       manufacturer: ManufacturerResponse.fromMap(json['manufacturer']),
       billiardTableType: BilliardTableTypeResponse.fromMap(json['billiardTableType']),
     );
@@ -62,7 +62,7 @@ class BilliardTableResponse {
       'clothColor': clothColor,
       'numberOfPockets': numberOfPockets,
       'description': description,
-      'isReserved': isReserved,
+      'price': price,
       'manufacturer': manufacturer.toMap(),
       'billiardTableType': billiardTableType.toMap(),
     };

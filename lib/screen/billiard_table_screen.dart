@@ -1,27 +1,30 @@
 import 'dart:typed_data';
-import 'package:billiard_club_frontend/model/cue_response.dart';
-import 'package:billiard_club_frontend/service/cue_service.dart'; // Assume you have a service for cues
+import 'package:billiard_club_frontend/model/billiard_table_response.dart';
+import 'package:billiard_club_frontend/service/billiard_table_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../util/constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class CueScreen extends StatefulWidget {
-  const CueScreen({Key? key}) : super(key: key);
-
+class BilliardTableScreen extends StatefulWidget {
+  const BilliardTableScreen({Key? key}) : super(key: key);
+  
   @override
-  _CueScreenState createState() => _CueScreenState();
+  _BilliardTableScreenState createState() => _BilliardTableScreenState();
 }
 
-class _CueScreenState extends State<CueScreen> {
-  final CueService _service = CueService(); // Assume you have a CueService
-  late Future<List<CueResponse>> _cues;
-  List<CueResponse> _filteredCues = [];
+class _BilliardTableScreenState extends State<BilliardTableScreen> {
+  final BilliardTableService _service = BilliardTableService();
+  late Future<List<BilliardTableResponse>> _billiardTables;
+  List<BilliardTableResponse> _filteredTables = [];
   List<String> _selectedTypes = [];
 
   @override
   void initState() {
     super.initState();
-    _cues = _service.getAllCues().then((cues) {
-      _filteredCues = cues;
-      return cues;
+    _billiardTables = _service.getAllBilliardTables().then((tables) {
+      _filteredTables = tables;
+      return tables;
     });
   }
 
@@ -32,20 +35,20 @@ class _CueScreenState extends State<CueScreen> {
       } else {
         _selectedTypes.add(type);
       }
-      _updateFilteredCues();
+      _updateFilteredTables();
     });
   }
 
-  void _updateFilteredCues() {
+  void _updateFilteredTables() {
     setState(() {
-      _cues = _service.getAllCues().then((cues) {
+      _billiardTables = _service.getAllBilliardTables().then((tables) {
         if (_selectedTypes.isEmpty) {
-          _filteredCues = cues;
+          _filteredTables = tables;
         } else {
-          _filteredCues = cues.where((cue) =>
-            _selectedTypes.contains(cue.cueType.name)).toList();
+          _filteredTables = tables.where((table) =>
+            _selectedTypes.contains(table.billiardTableType.name)).toList();
         }
-        return _filteredCues;
+        return _filteredTables;
       });
     });
   }
@@ -53,7 +56,7 @@ class _CueScreenState extends State<CueScreen> {
   void _clearFilters() {
     setState(() {
       _selectedTypes.clear();
-      _updateFilteredCues();
+      _updateFilteredTables();
     });
   }
 
@@ -61,10 +64,9 @@ class _CueScreenState extends State<CueScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cues', style: TextStyle(color: Colors.black)),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        title: Text('Billiard Tables'),
       ),
-      backgroundColor: const Color.fromARGB(255, 175, 239, 169),
+      backgroundColor: Color.fromARGB(255, 175, 239, 169),
       body: Column(
         children: [
           Padding(
@@ -88,9 +90,11 @@ class _CueScreenState extends State<CueScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterButton('Кий 1'),
-                        _buildFilterButton('Кий 2'),
-                        _buildFilterButton('Кий 3'),
+                        _buildFilterButton('Пул'),
+                        _buildFilterButton('Пирамида'),
+                        _buildFilterButton('Снукер'),
+                        _buildFilterButton('Карамболь'),
+                        _buildFilterButton('Маленькая пирамида'),
                       ],
                     ),
                   ),
@@ -99,26 +103,22 @@ class _CueScreenState extends State<CueScreen> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<CueResponse>>(
-              future: _cues,
+            child: FutureBuilder<List<BilliardTableResponse>>(
+              future: _billiardTables,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  //return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No cues found.'));
+                  return Center(child: Text('No billiard tables found.'));
                 }
 
-                final cues = _filteredCues;
-                return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                  ),
-                  itemCount: cues.length,
+                final tables = _filteredTables;
+                return ListView.builder(
+                  itemCount: tables.length,
                   itemBuilder: (context, index) {
-                    return CueCard(cue: cues[index]);
+                    return BilliardTableCard(table: tables[index]);
                   },
                 );
               },
@@ -136,56 +136,43 @@ class _CueScreenState extends State<CueScreen> {
       child: ElevatedButton(
         onPressed: () => _toggleFilter(type),
         style: ElevatedButton.styleFrom(
-          foregroundColor: isSelected ? Colors.white : Colors.green,
-          backgroundColor: isSelected ? Colors.green : Colors.white,
+          foregroundColor: isSelected ? Colors.white : Colors.green, backgroundColor: isSelected ? Colors.green : Colors.white,
           side: BorderSide(color: Colors.green),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Text(type, style: TextStyle(fontSize: 12)), // Adjusted font size
+        child: Text(type),
       ),
     );
   }
 }
 
-class CueCard extends StatelessWidget {
-  final CueResponse cue;
+class BilliardTableCard extends StatelessWidget {
+  final BilliardTableResponse table;
 
-  const CueCard({Key? key, required this.cue}) : super(key: key);
+  const BilliardTableCard({Key? key, required this.table}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
-      margin: const EdgeInsets.all(8.0),
+      margin: EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FutureBuilder<Uint8List?>(
-            future: CueService().getCueImage(cue.id), // Assume this method exists
-            builder: (context, imageSnapshot) {
-              if (imageSnapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                  height: 150,
-                  child: const Center(child: CircularProgressIndicator()),
-                );
-              } else if (imageSnapshot.hasError || !imageSnapshot.hasData) {
-                return Container(
-                  height: 150,
-                  child: const Center(child: Text('Error loading image')),
-                );
-              }
-
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Image.memory(
-                  imageSnapshot.data!,
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
-              );
-            },
+          CachedNetworkImage(
+            imageUrl: "$baseURL/api/v1/carambol/billiard-tables/${table.id}/image", // Assuming you have this property
+            height: 200,
+            fit: BoxFit.contain,
+            placeholder: (context, url) => Container(
+              height: 200,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (context, url, error) => Container(
+              height: 200,
+              child: Center(child: Text('No image available')),
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,42 +180,40 @@ class CueCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
-                  '${cue.price} BYN/час',
+                  '${table.price * 4} BYN/час',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.green,
-                    fontSize: 16, // Adjusted font size
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'Свободных столов - ${table.amount}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              cue.name,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              cue.cueType.name,
-              style: const TextStyle(fontSize: 14), // Adjusted font size
-            ),
-          ),
-          Padding(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
-                  'Свободно киев - ${cue.amount}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14, // Adjusted font size
-                  ),
+                  '${table.billiardTableType.name}',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
-          const SizedBox(height: 8),
-          ElevatedButton(
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.green,
@@ -240,7 +225,11 @@ class CueCard extends StatelessWidget {
                     textStyle: TextStyle(fontSize: 18),
                   ),
                   child: Text("Забронировать"),
-      )],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:billiard_club_frontend/screen/billiard_table_screen.dart';
 import 'package:billiard_club_frontend/screen/cues_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -23,21 +24,21 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CuePage()),
+                  MaterialPageRoute(builder: (context) => const CueScreen()),
                 );
               },
               child: const Text('Go to Cue Page'),
             ),
-            // const SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) => const PageTwo()),
-            //     );
-            //   },
-            //   child: const Text('Go to Page Two'),
-            // ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BilliardTableScreen()),
+                );
+              },
+              child: const Text('Go to Billiard Tables Page'),
+            ),
           ],
         ),
       ),
