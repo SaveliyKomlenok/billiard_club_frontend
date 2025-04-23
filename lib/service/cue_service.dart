@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:billiard_club_frontend/model/cue_response.dart';
+import 'package:billiard_club_frontend/model/request/selected_cue_request.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -83,4 +84,6 @@ class CueService {
       rethrow;
     }
   }
+
+  static save(SelectedCueRequest request) {}
 }

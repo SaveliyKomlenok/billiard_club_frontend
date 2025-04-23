@@ -34,6 +34,33 @@ class ReservationService {
     }
   }
 
+  Future<List<ReservationResponse>> findAllActiveReservations() async {
+    final url = Uri.parse('$baseURL/api/v1/carambol/reservations/active');
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    final headers = <String, String>{
+      "Content-Type": "application/json; charset=utf-8",
+      if (token != null) "Authorization": "Bearer $token",
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(utf8.decode(response.bodyBytes));
+        var list = jsonResponse['items'] as List<dynamic>;
+        return list.map((model) => ReservationResponse.fromMap(model)).toList();
+      } else {
+        throw Exception('Failed to load reservations: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      rethrow;
+    }
+  }
+
   Future<ReservationResponse> createReservation(ReservationRequest request) async {
     final url = Uri.parse('$baseURL/api/v1/carambol/reservations');
 

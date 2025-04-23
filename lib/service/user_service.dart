@@ -5,11 +5,9 @@ import 'package:billiard_club_frontend/model/user_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../util/constants.dart';
+
 class UserService {
-  final String baseURL;
-
-  UserService(this.baseURL);
-
   Future<UserResponse> getProfile() async {
     final url = Uri.parse('$baseURL/api/v1/carambol/users/profile');
     final headers = await _getHeaders();

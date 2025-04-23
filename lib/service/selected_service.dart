@@ -3,11 +3,9 @@ import 'package:billiard_club_frontend/model/selected_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../util/constants.dart';
+
 class SelectedService {
-  final String baseURL;
-
-  SelectedService(this.baseURL);
-
   Future<SelectedResponse> listOfSelected() async {
     final url = Uri.parse('$baseURL/api/v1/carambol/selected');
 

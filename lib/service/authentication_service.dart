@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:billiard_club_frontend/model/request/user_authenticate_request.dart';
 import 'package:billiard_club_frontend/model/request/user_register_request.dart';
+import 'package:billiard_club_frontend/screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +24,12 @@ class AuthenticationService {
         prefs.setString('token', myToken);
         prefs.setString('role', jsonResponse['role']);
         prefs.setString('username', jsonResponse['username']);
-        Navigator.pushNamed(context, '/main');
+        
+        
+         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Вы успешно авторизованы')),
+        );
+      
       } else {
         // Обработка ошибок
         ScaffoldMessenger.of(context).showSnackBar(
@@ -46,17 +52,22 @@ class AuthenticationService {
         headers: headers,
         body: jsonEncode(request.toMap()),
       );
+       var myToken;
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var jsonResponse = json.decode(utf8.decode(response.bodyBytes));
       if (jsonResponse['username'] != null) {
-        var myToken = jsonResponse['token'];
+        myToken = jsonResponse['token'];
         prefs.setString('token', myToken);
         prefs.setString('role', jsonResponse['role']);
         prefs.setString('username', jsonResponse['username']);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (c) => const HomePage()),
+        );
       } else {
         // Обработка ошибок
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Неверные учетные данные')),
+          SnackBar(content: Text(myToken)),
         );
       }
     } catch (e) {
